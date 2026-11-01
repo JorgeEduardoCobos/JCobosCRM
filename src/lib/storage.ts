@@ -41,7 +41,11 @@ export const vehiclePriceLabel = (vehicle: Vehicle): string => {
   return base;
 };
 
-export type Client = { id: string; name: string; phone: string; city: string; status: string; notes: string; createdAt: string };
+export type OpportunityStatus = 'Nuevo prospecto' | 'Contactado' | 'Interesado' | 'Cotización enviada' | 'Seguimiento pendiente' | 'Negociación' | 'Venta cerrada' | 'No concretado';
+export type SaleStatus = 'Sin venta' | 'Vendido' | 'No concretado';
+export type ContactChannel = 'Llamada' | 'WhatsApp' | 'Visita' | 'Correo' | 'Otro';
+export type ContactRecord = { id: string; contactedAt: string; channel: ContactChannel; result: string; note: string };
+export type Client = { id: string; name: string; phone: string; city: string; status: string; notes: string; createdAt: string; opportunityStatus?: OpportunityStatus; vehicleInterest?: string; lastContactAt?: string; nextFollowUpAt?: string; contactHistory?: ContactRecord[]; saleStatus?: SaleStatus };
 export type Quote = { id: string; vehicleId: string; vehicleName: string; price: number; mode: 'Contado' | 'Financiado'; clientName: string; total: number; createdAt: string; finance?: FinanceConfig; entryAmount?: number; discountPercent?: number; discountAmount?: number; calculation?: FinanceResult };
 export type FinanceConfig = { annualRate: number; ratePeriod: 'Anual' | 'Mensual'; entryPercent: number; term: number; insuranceMode: 'Porcentaje' | 'Valor fijo'; insuranceValue: number; insuranceApplication: 'Capitalizado' | 'Por cuota' | 'Único'; taxMode: 'Porcentaje' | 'Valor fijo'; taxValue: number; taxBase: 'Precio' | 'Monto financiado'; taxApplication: 'Inicial' | 'Capitalizado' | 'Por cuota'; enabledTerms: number[]; notes: string };
 export type CompanyInfo = { name: string; advisorName: string };
