@@ -1,8 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { VehicleInterestPicker } from '@/VehicleInterestPicker';
+import { ClientQuoteList } from '@/ClientQuoteList';
+import { QuoteDetail } from '@/QuoteHistory';
 import { findDuplicateClient } from '@/lib/clientDuplicates';
-import type { Client, OpportunityStatus, SaleStatus, Vehicle } from '@/lib/storage';
+import type { Client, OpportunityStatus, Quote, SaleStatus, Vehicle } from '@/lib/storage';
 
 const opportunityOptions: OpportunityStatus[] = ['Nuevo prospecto', 'Contactado', 'Interesado', 'Cotización enviada', 'Seguimiento pendiente', 'Negociación', 'Venta cerrada', 'No concretado'];
 const saleOptions: SaleStatus[] = ['Sin venta', 'Vendido', 'No concretado'];
@@ -18,10 +20,11 @@ function FormField({ label, children }: { label: string; children: ReactNode }) 
   return <label className="block text-sm font-semibold">{label}<div className="mt-2">{children}</div></label>;
 }
 
-export function ClientProfile({ client, clients, vehicles, onSave, onBack }: { client: Client; clients: Client[]; vehicles: Vehicle[]; onSave: (next: Client) => void; onBack: () => void }) {
+export function ClientProfile({ client, clients, vehicles, quotes, onSave, onBack }: { client: Client; clients: Client[]; vehicles: Vehicle[]; quotes: Quote[]; onSave: (next: Client) => void; onBack: () => void }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Client>(client);
   const [error, setError] = useState('');
+  const [openQuoteId, setOpenQuoteId] = useState<string | null>(null);
 
   const startEdit = () => { setDraft(client); setError(''); setEditing(true); };
   const cancelEdit = () => { setDraft(client); setError(''); setEditing(false); };
@@ -44,6 +47,9 @@ export function ClientProfile({ client, clients, vehicles, onSave, onBack }: { c
     setEditing(false);
     setError('');
   };
+
+  const openQuote = quotes.find((quote) => quote.id === openQuoteId && quote.clientId === client.id);
+  if (openQuote) return <QuoteDetail quote={openQuote} onBack={() => setOpenQuoteId(null)} />;
 
   if (editing) {
     return <div className="fade-in">
@@ -116,6 +122,7 @@ export function ClientProfile({ client, clients, vehicles, onSave, onBack }: { c
         <h3 className="mb-2 text-lg font-bold">Observaciones</h3>
         <p className="whitespace-pre-line text-sm leading-6 text-[#17202a]">{orDefault(client.notes)}</p>
       </section>
+      <ClientQuoteList clientId={client.id} quotes={quotes} onOpen={setOpenQuoteId} />
     </div>
   </div>;
 }

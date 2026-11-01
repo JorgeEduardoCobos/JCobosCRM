@@ -6,9 +6,9 @@ import { QuoteClientSection } from '@/QuoteClientSection';
 type ModeFilter = 'Todas' | 'Contado' | 'Financiado';
 
 const currency = new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' });
-const money = (value: number | undefined): string => (value === undefined ? 'No disponible' : currency.format(value));
+export const money = (value: number | undefined): string => (value === undefined ? 'No disponible' : currency.format(value));
 const percent = (value: number | undefined): string => (value === undefined ? 'No disponible' : `${value.toFixed(2)}%`);
-const formatDate = (iso: string): string => new Date(iso).toLocaleString('es-EC', { dateStyle: 'medium', timeStyle: 'short' });
+export const formatDate = (iso: string): string => new Date(iso).toLocaleString('es-EC', { dateStyle: 'medium', timeStyle: 'short' });
 const normalizeText = (value: string): string => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 const clientLabel = (quote: Quote): string => quote.clientName || 'Sin nombre de cliente';
 
@@ -32,7 +32,7 @@ function DetailCard({ title, children }: { title: string; children: ReactNode })
 
 type LinkProps = { data: AppData; updateData: (next: AppData, message?: string) => void; openClient: (clientId: string) => void };
 
-function QuoteDetail({ quote, data, updateData, openClient, onBack, onHome }: { quote: Quote; onBack: () => void; onHome: () => void } & LinkProps) {
+export function QuoteDetail({ quote, onBack, onHome, clientSection }: { quote: Quote; onBack: () => void; onHome?: () => void; clientSection?: ReactNode }) {
   const calc = quote.calculation;
   const fin = quote.finance;
   const isFinanced = quote.mode === 'Financiado';
@@ -44,7 +44,7 @@ function QuoteDetail({ quote, data, updateData, openClient, onBack, onHome }: { 
         <button onClick={onBack} className="flex items-center gap-2 rounded-xl border border-[#dce7e2] bg-white px-4 py-2 text-sm font-bold hover:border-[#89a89d]">
           <ArrowLeft size={16} />Volver al listado
         </button>
-        <button onClick={onHome} className="rounded-xl border border-[#dce7e2] bg-white px-4 py-2 text-sm font-bold hover:border-[#89a89d]">Ir al inicio</button>
+        {onHome && <button onClick={onHome} className="rounded-xl border border-[#dce7e2] bg-white px-4 py-2 text-sm font-bold hover:border-[#89a89d]">Ir al inicio</button>}
       </div>
 
       <div className="mb-6">
@@ -52,7 +52,7 @@ function QuoteDetail({ quote, data, updateData, openClient, onBack, onHome }: { 
         <h2 className="mt-1 text-3xl font-bold">{clientLabel(quote)}</h2>
       </div>
 
-      <QuoteClientSection quote={quote} data={data} updateData={updateData} openClient={openClient} />
+      {clientSection}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <DetailCard title="Información general">
@@ -147,7 +147,7 @@ export function QuoteHistory({ data, navigate, updateData, openClient }: { navig
   }, [quotes, search, modeFilter]);
 
   const selected = quotes.find((quote) => quote.id === selectedId);
-  if (selected) return <QuoteDetail quote={selected} data={data} updateData={updateData} openClient={openClient} onBack={() => setSelectedId(null)} onHome={() => navigate('Inicio')} />;
+  if (selected) return <QuoteDetail quote={selected} onBack={() => setSelectedId(null)} onHome={() => navigate('Inicio')} clientSection={<QuoteClientSection quote={selected} data={data} updateData={updateData} openClient={openClient} />} />;
 
   return (
     <div className="fade-in">
