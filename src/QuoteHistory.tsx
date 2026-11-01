@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { ArrowLeft, ChevronRight, Search } from 'lucide-react';
 import type { AppData, Quote } from '@/lib/storage';
+import { QuoteClientSection } from '@/QuoteClientSection';
 
 type ModeFilter = 'Todas' | 'Contado' | 'Financiado';
 
@@ -29,7 +30,9 @@ function DetailCard({ title, children }: { title: string; children: ReactNode })
   );
 }
 
-function QuoteDetail({ quote, onBack, onHome }: { quote: Quote; onBack: () => void; onHome: () => void }) {
+type LinkProps = { data: AppData; updateData: (next: AppData, message?: string) => void; openClient: (clientId: string) => void };
+
+function QuoteDetail({ quote, data, updateData, openClient, onBack, onHome }: { quote: Quote; onBack: () => void; onHome: () => void } & LinkProps) {
   const calc = quote.calculation;
   const fin = quote.finance;
   const isFinanced = quote.mode === 'Financiado';
@@ -49,7 +52,9 @@ function QuoteDetail({ quote, onBack, onHome }: { quote: Quote; onBack: () => vo
         <h2 className="mt-1 text-3xl font-bold">{clientLabel(quote)}</h2>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <QuoteClientSection quote={quote} data={data} updateData={updateData} openClient={openClient} />
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <DetailCard title="Información general">
           <DetailRow label="Identificador" value={quote.id} />
           <DetailRow label="Fecha" value={formatDate(quote.createdAt)} />
@@ -130,7 +135,7 @@ function QuoteDetail({ quote, onBack, onHome }: { quote: Quote; onBack: () => vo
   );
 }
 
-export function QuoteHistory({ data, navigate }: { data: AppData; navigate: (page: 'Inicio') => void }) {
+export function QuoteHistory({ data, navigate, updateData, openClient }: { navigate: (page: 'Inicio') => void } & LinkProps) {
   const [search, setSearch] = useState('');
   const [modeFilter, setModeFilter] = useState<ModeFilter>('Todas');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -142,7 +147,7 @@ export function QuoteHistory({ data, navigate }: { data: AppData; navigate: (pag
   }, [quotes, search, modeFilter]);
 
   const selected = quotes.find((quote) => quote.id === selectedId);
-  if (selected) return <QuoteDetail quote={selected} onBack={() => setSelectedId(null)} onHome={() => navigate('Inicio')} />;
+  if (selected) return <QuoteDetail quote={selected} data={data} updateData={updateData} openClient={openClient} onBack={() => setSelectedId(null)} onHome={() => navigate('Inicio')} />;
 
   return (
     <div className="fade-in">
