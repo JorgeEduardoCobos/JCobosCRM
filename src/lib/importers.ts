@@ -111,7 +111,7 @@ export async function parsePdf(file: File): Promise<{ pages: number; rows: PdfPr
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
     const content = await page.getTextContent();
-    const items: TextItem[] = content.items.filter((item): item is { str: string; transform: number[] } => 'str' in item && Boolean((item as { str: string }).str?.trim())).map((item) => ({ str: (item as { str: string }).str, x: (item as { transform: number[] }).transform[4], y: (item as { transform: number[] }).transform[5] }));
+    const items: TextItem[] = content.items.filter((item) => 'str' in item && Boolean((item as { str: string }).str?.trim())).map((item) => ({ str: (item as { str: string }).str, x: (item as { transform: number[] }).transform[4], y: (item as { transform: number[] }).transform[5] }));
     totalTextItems += items.length;
     if (!items.length) continue;
     const { bounds, headerY } = detectColumns(items);
